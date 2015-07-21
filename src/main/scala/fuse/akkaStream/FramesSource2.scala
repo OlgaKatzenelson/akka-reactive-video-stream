@@ -13,9 +13,13 @@ import akka.stream.scaladsl.FlowGraph
 import akka.stream.scaladsl.Broadcast
 import org.bytedeco.javacv.OpenCVFrameConverter
 import org.bytedeco.javacpp.opencv_core.IplImage
+import org.bytedeco.javacpp.opencv_core.IplImage
+import org.bytedeco.javacpp.opencv_core.Mat
+import org.bytedeco.javacpp.opencv_imgproc._
+import org.bytedeco.javacpp.opencv_core._
+import akka.stream.scaladsl.RunnableFlow
 
 object FramesSource2 extends App {
-
 
   //  def main(args: Array[String]): Unit = {
   //    run
@@ -33,31 +37,41 @@ object FramesSource2 extends App {
   grabber.start()
 
   val source: Source[Frame, Unit] =
-    Source(() => Iterator.continually(grabber.grab()));
-
-  
+    Source(() => Iterator.continually(grabber.grab())) ;
 
   //val sink = Sink.foreach { f: Frame => canvas.showImage(f) }
-  val sink = Sink.foreach { f: Frame => canvas.showImage(convert(f)) }
+  val sink = Sink.foreach { f: Frame => canvas.showImage(f) }
 
-  def convert(f : Frame) : Frame = {
-    f
+  def convertGrayScale(frame: Frame): Frame = {
+    val x: OpenCVFrameConverter.ToIplImage = new OpenCVFrameConverter.ToIplImage();
+    val image: IplImage = x.convert(frame);
+    val imageBW: IplImage = cvCreateImage(cvGetSize(image), IPL_DEPTH_8U, 1);
+    cvCvtColor(image, imageBW, CV_BGR2GRAY);
+    x.convert(imageBW)
+
   }
 
-  //    val g = FlowGraph.closed() { implicit b =>
-  //      import FlowGraph.Implicits._
-  //
-  //      val bcast = b.add(Broadcast[Frame](1))
-  //      source ~> bcast.in
-  //      bcast.out(0) ~> Flow[Frame] ~> sink
-  //    }
-  //    g.run()
+  val flow = Flow[Frame].map { f => convertGrayScale(f) }
 
-  source.runWith(sink).
-    onComplete { x =>
-      canvas.dispose()
-      system.shutdown();
-    }
+  
+  
+  val g : RunnableFlow[Unit] = FlowGraph.closed() { implicit b =>
+    import FlowGraph.Implicits._
+
+    val bcast = b.add(Broadcast[Frame](1))
+    source ~> bcast.in
+    bcast.out(0) ~> flow ~> sink
+  }
+  
+  g.run()
+  //g.onComplet
+  
+  
+  //  source.runWith(sink).
+  //    onComplete { x =>
+  //      canvas.dispose()
+  //      system.shutdown();
+  //    }
 
   //  }
 
