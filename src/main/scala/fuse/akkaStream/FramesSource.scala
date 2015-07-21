@@ -13,9 +13,11 @@ import akka.stream.scaladsl.FlowGraph
 import akka.stream.scaladsl.Broadcast
 import org.bytedeco.javacv.OpenCVFrameConverter
 import org.bytedeco.javacpp.opencv_core.IplImage
+import org.bytedeco.javacpp.opencv_core.Mat
+import org.bytedeco.javacpp.opencv_imgproc._
+import org.bytedeco.javacpp.opencv_core._
 
 object FramesSource extends App {
-
 
   //  def main(args: Array[String]): Unit = {
   //    run
@@ -35,13 +37,16 @@ object FramesSource extends App {
   val source: Source[Frame, Unit] =
     Source(() => Iterator.continually(grabber.grab()));
 
-  
-
   //val sink = Sink.foreach { f: Frame => canvas.showImage(f) }
-  val sink = Sink.foreach { f: Frame => canvas.showImage(convert(f)) }
+  val sink = Sink.foreach { f: Frame => canvas.showImage(convertGrayScale(f)) }
 
-  def convert(f : Frame) : Frame = {
-    f
+  def convertGrayScale(frame: Frame): Frame = {
+    val x: OpenCVFrameConverter.ToIplImage = new OpenCVFrameConverter.ToIplImage();
+    val image: IplImage = x.convert(frame);
+    val imageBW: IplImage = cvCreateImage(cvGetSize(image), IPL_DEPTH_8U, 1);
+    cvCvtColor(image, imageBW, CV_BGR2GRAY);
+    x.convert(imageBW)
+
   }
 
   //    val g = FlowGraph.closed() { implicit b =>
