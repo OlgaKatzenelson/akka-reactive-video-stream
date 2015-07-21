@@ -1,7 +1,7 @@
 package fuse.akkaStream
 
 import akka.actor.ActorSystem
-import akka.stream.ActorMaterializer
+import akka.stream.ActorFlowMaterializer
 import akka.stream.scaladsl.Source
 
 import scala.util.{ Failure, Success }
@@ -16,7 +16,7 @@ object BasicTransformation {
     implicit val system = ActorSystem("Sys")
     import system.dispatcher
 
-    implicit val materializer = ActorMaterializer()
+    implicit val materializer = ActorFlowMaterializer()
 
     val text =
       """|Lorem Ipsum is simply dummy text of the printing and typesetting industry.
