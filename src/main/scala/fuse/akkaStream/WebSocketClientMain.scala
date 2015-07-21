@@ -29,34 +29,17 @@ object WebSocketClientMain {
 
     println("before connection")
     wsh ! WebSocket.Connect("localhost", 9002, "/ok")
-    Thread.sleep(2000L) // wait for all servers to be cleanly started
-    wsh ! WebSocket.Send("22.1523721 41.4140567")
+    Thread.sleep(2000L) // wait for websocket to connect
+
+    val text =
+      """|Lorem Ipsum is simply dummy text of the printing and typesetting industry.
+        |Lorem Ipsum has been the industry's standard dummy text ever since the 1500s,
+        |when an unknown printer took a galley of type and scrambled it to make a type
+        |specimen book.""".stripMargin
+
+    text.split("\\s").foreach(p=>{wsh ! WebSocket.Send(p)})
     Thread.sleep(1000L)
     println("after send")
     wsh ! WebSocket.Release
-
-//    implicit val materializer = ActorFlowMaterializer()
-//
-//    val localActor = system.actorOf(Props[LocalActor], name = "local")
-//
-//    val text =
-//      """|Lorem Ipsum is simply dummy text of the printing and typesetting industry.
-//        |Lorem Ipsum has been the industry's standard dummy text ever since the 1500s,
-//        |when an unknown printer took a galley of type and scrambled it to make a type
-//        |specimen book.""".stripMargin
-//
-//    Source(() => text.split("\\s").iterator).
-//      map(_.toUpperCase).
-//      // filter(line => line.length > 3).
-//      runForeach(localActor ! _).
-//      onComplete {
-//        case Success(result) =>
-//          println("Shutting down client")
-//          system.shutdown()
-//          run
-//        case Failure(e) =>
-//          println("Failure: " + e.getMessage)
-//          system.shutdown()
-//      }
   }
 }
