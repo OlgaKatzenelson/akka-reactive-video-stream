@@ -5,6 +5,8 @@ name := """akka-video-stream"""
 version := "1.1"
 
 scalaVersion := "2.11.7"
+val sprayV = "1.3.3"
+
 //classpathTypes += "maven-plugin"
 
 resolvers +=
@@ -13,7 +15,15 @@ resolvers +=
 //libraryDependencies ++= Seq("org.bytedeco" %% "javacv" % "0.8" )
 
 libraryDependencies ++= Seq(
-  "com.typesafe.akka" %% "akka-stream-experimental" % "1.0-M5"
+//  "com.typesafe.akka" %% "akka-stream-experimental" % "1.0-M5"
+)
+
+// RANM: from https://gist.github.com/josdirksen/be83e948bb2b320c5d07
+// RANM: from http://www.smartjava.org/content/create-reactive-websocket-server-akka-streams
+libraryDependencies ++= Seq(
+  "com.typesafe.akka" %% "akka-stream-experimental" % "1.0-RC2",
+  "com.typesafe.akka" %% "akka-http-core-experimental" % "1.0-RC2",
+  "com.typesafe.play" %% "play-json" % "2.3.4"
 )
 
 libraryDependencies +=
@@ -31,7 +41,13 @@ libraryDependencies ++= Seq(
   "org.bytedeco.javacpp-presets" % "opencv" % ("2.4.11-" + javacppVersion) classifier platform,
   "org.scala-lang.modules"      %% "scala-swing"     % "1.0.1",
   "junit"                        % "junit"           % "4.12" % "test",
-  "com.novocode"                 % "junit-interface" % "0.11" % "test"
+  "com.novocode"                 % "junit-interface" % "0.11" % "test",
+  "com.typesafe.akka"   %%  "akka-slf4j"            % "2.3.7"             withSources() withJavadoc,
+  "com.typesafe.akka"   %%  "akka-actor"            % "2.3.7"              withSources() withJavadoc,
+  "com.wandoulabs.akka" %%  "spray-websocket"       % "0.1.4"           withSources() withJavadoc,
+  "io.spray"            %%  "spray-json"            % "1.3.1"           withSources() withJavadoc,
+  "io.spray"            %%  "spray-can"             % sprayV            withSources() withJavadoc,
+  "io.spray"            %%  "spray-routing"         % sprayV            withSources() withJavadoc
 )
 
 

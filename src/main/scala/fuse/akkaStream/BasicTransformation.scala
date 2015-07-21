@@ -1,6 +1,6 @@
 package fuse.akkaStream
 
-import akka.actor.ActorSystem
+import akka.actor.{ Props, ActorSystem }
 import akka.stream.ActorFlowMaterializer
 import akka.stream.scaladsl.Source
 
@@ -18,6 +18,8 @@ object BasicTransformation {
 
     implicit val materializer = ActorFlowMaterializer()
 
+    val localActor = system.actorOf(Props[LocalActor], name = "local")
+
     val text =
       """|Lorem Ipsum is simply dummy text of the printing and typesetting industry.
         |Lorem Ipsum has been the industry's standard dummy text ever since the 1500s,
@@ -27,7 +29,7 @@ object BasicTransformation {
     Source(() => text.split("\\s").iterator).
       map(_.toUpperCase).
       // filter(line => line.length > 3).
-      runForeach(println).
+      runForeach(localActor ! _).
       onComplete {
         case Success(result) =>
           println("Shutting down client")

@@ -24,6 +24,7 @@ object VideoGrabberApp extends App {
   try {
     while (true) {
       canvas.showImage(grabber.grab())
+      Thread.sleep(1000 / 25)
     }
   } catch {
     case _ => println("End of stream")
