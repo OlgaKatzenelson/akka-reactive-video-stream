@@ -42,6 +42,7 @@ libraryDependencies ++= Seq(
   "org.scala-lang.modules"      %% "scala-swing"     % "1.0.1",
   "junit"                        % "junit"           % "4.12" % "test",
   "com.novocode"                 % "junit-interface" % "0.11" % "test",
+  "com.google.code.gson" % "gson" % "1.7.1",
   "com.typesafe.akka"   %%  "akka-slf4j"            % "2.3.7"             withSources() withJavadoc,
   "com.typesafe.akka"   %%  "akka-actor"            % "2.3.7"              withSources() withJavadoc,
   "com.wandoulabs.akka" %%  "spray-websocket"       % "0.1.4"           withSources() withJavadoc,

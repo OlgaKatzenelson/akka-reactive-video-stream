@@ -2,10 +2,11 @@ package fuse.akkaStream.http
 
 import akka.actor.{Actor, actorRef2Scala}
 import akka.io.IO
+import akka.util.ByteString
 import spray.can.Http
 import spray.can.server.UHttp
 import spray.can.websocket.WebSocketClientWorker
-import spray.can.websocket.frame.{CloseFrame, StatusCode, TextFrame}
+import spray.can.websocket.frame.{BinaryFrame, CloseFrame, StatusCode, TextFrame}
 import spray.http.Uri.apply
 import spray.http.{HttpHeaders, HttpMethods, HttpRequest}
 

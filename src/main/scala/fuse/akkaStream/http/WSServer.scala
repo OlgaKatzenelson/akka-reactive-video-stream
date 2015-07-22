@@ -13,6 +13,9 @@ import akka.io.Inet
 import akka.routing.BroadcastGroup
 import akka.stream.ActorFlowMaterializer
 import akka.stream.scaladsl._
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+import org.bytedeco.javacv.Frame
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
@@ -53,31 +56,16 @@ object WSServer extends App {
   val router: ActorRef = system.actorOf(Props[RouterActor], "router")
   val vmactor: ActorRef = system.actorOf(Props(classOf[VMActor], router ,2 seconds, 20 milliseconds))
 
-  // Bind to an HTTP port and handle incoming messages.
-  // With the custom extractor we're always certain the header contains
-  // the correct upgrade message.
-  // We can pass in a socketoptions to tune the buffer behavior
-  // e.g options =  List(Inet.SO.SendBufferSize(100))
-  val binding = Http().bindAndHandleSync({
-    case WSRequest(req@HttpRequest(GET, Uri.Path("/simple"), _, _, _)) => handleWith(req, Flows.reverseFlow)
-    case WSRequest(req@HttpRequest(GET, Uri.Path("/echo"), _, _, _)) => handleWith(req, Flows.echoFlow)
-    case WSRequest(req@HttpRequest(GET, Uri.Path("/graph"), _, _, _)) => handleWith(req, Flows.graphFlow)
-    case WSRequest(req@HttpRequest(GET, Uri.Path("/graphWithSource"), _, _, _)) => handleWith(req, Flows.graphFlowWithExtraSource)
-    case WSRequest(req@HttpRequest(GET, Uri.Path("/stats"), _, _, _)) => handleWith(req, Flows.graphFlowWithStats(router))
-    case _: HttpRequest => HttpResponse(400, entity = "Invalid websocket request")
-  }, interface = "localhost", port = 9001)
-
-
   val requestHandler: HttpRequest => HttpResponse = {
     case HttpRequest(GET, Uri.Path("/"), _, _,_) =>
       HttpResponse(entity=HttpEntity(MediaTypes.`text/html`, "hello there my darling"))
     case WSRequest(req@HttpRequest(GET, Uri.Path("/ok"), _, _, _)) =>
-      handleWith(req, Flows.okFlow)
+      handleWith(req, Flows.frameFlow)
   }
 
 
-  val binding2 = Http().bind(interface = "localhost", port = 9002)
-  binding2.to(Sink.foreach( { connection =>
+  val binding = Http().bind(interface = "localhost", port = 9002)
+  binding.to(Sink.foreach( { connection =>
   println("Bla bla")
     connection handleWithSyncHandler requestHandler
   })).run()
@@ -85,8 +73,7 @@ object WSServer extends App {
 
   // binding is a future, we assume it's ready within a second or timeout
   try {
-    Await.result(binding, 1 second)
-    println("Server online at http://localhost:9001")
+    println("Server online at http://localhost:9002")
   } catch {
     case exc: TimeoutException =>
       println("Server took to long to startup, shutting down")
@@ -123,10 +110,21 @@ object Flows {
   /**
    * Simple flow which just returns empty response back to the client
    */
-  def okFlow: Flow[Message, Message, Unit] =  {
+  def frameFlow: Flow[Message, Message, Unit] =  {
     Flow[Message].map {
       case TextMessage.Strict(txt) => {
-        println("okFlow: " + txt)
+//        val gson:Gson = new Gson
+//        try {
+//          gson.fromJson(txt.toString, Frame.class)
+//        }catch {
+//          case _ => println("fromJson error")
+//        }
+
+//        println("okFlow: " + frame.imageHeight + txt)
+        TextMessage.Strict("")
+      }
+      case _ => {
+        println("okFlow: DEF" )
         TextMessage.Strict("")
       }
     }

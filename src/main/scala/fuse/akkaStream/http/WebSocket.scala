@@ -1,6 +1,7 @@
 package fuse.akkaStream.http
 
 import akka.actor.{ ActorRef, ActorSystem }
+import akka.util.ByteString
 import spray.http.HttpRequest
 
 object WebSocket {
